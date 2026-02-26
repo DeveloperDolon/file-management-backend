@@ -8,11 +8,7 @@ import ApiError from "../errors/ApiError.js";
 import { jwtHelpers } from "../helpers/jwtHelper.js";
 
 const auth = (...roles: string[]) => {
-  return async (
-    req: Request & { user?: any },
-    res: Response,
-    next: NextFunction
-  ) => {
+  return async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
 
@@ -20,10 +16,7 @@ const auth = (...roles: string[]) => {
         throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!");
       }
 
-      const verifiedUser = jwtHelpers.verifyToken(
-        token,
-        config.jwt.jwt_access_secret as Secret
-      );
+      const verifiedUser = jwtHelpers.verifyToken(token, config.jwt.jwt_access_secret as Secret);
 
       req.user = verifiedUser;
 
