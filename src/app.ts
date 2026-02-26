@@ -4,10 +4,10 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
 
-import globalErrorHandler from "./app/middlewares/globalErrorHandler";
-import notFound from "./app/middlewares/notFound";
-import config from "./config";
-import router from "./routes";
+import globalErrorHandler from "./app/middlewares/globalErrorHandler.js";
+import notFound from "./app/middlewares/notFound.js";
+import config from "./config/index.js";
+import router from "./routes/index.js";
 
 const app: Application = express();
 
