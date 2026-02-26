@@ -6,4 +6,5 @@ dotend.config({path: path.join((process.cwd(), '.env'))});
 
 export default {
     DB_URL: process.env.DATABASE_URL ?? '',
+    node_env: process.env.NODE_ENV ?? 'development',
 }
