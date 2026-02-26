@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
-import httpStatus from "http-status";
 import { AuthServices } from "#app/modules/auth/auth.service.js";
 import ApiError from "#app/errors/ApiError.js";
 import { jwtHelpers } from "#app/helpers/jwtHelper.js";
@@ -12,20 +11,20 @@ import { generateOTP } from "#app/utils/generateOtp.js";
 var mockPrisma: any;
 
 vi.mock("@prisma/client", () => {
-    mockPrisma = {
-        user: {
-            findUnique: vi.fn(),
-            findUniqueOrThrow: vi.fn(),
-            create: vi.fn(),
-            update: vi.fn(),
-        },
-    };
+  mockPrisma = {
+    user: {
+      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+    },
+  };
 
-    return {
-        PrismaClient: class {
-            user = mockPrisma.user;
-        },
-    };
+  return {
+    PrismaClient: class {
+      user = mockPrisma.user;
+    },
+  };
 });
 
 vi.mock("bcryptjs");
@@ -43,7 +42,6 @@ describe("AuthServices", () => {
 
   describe("registerUser", () => {
     it("should register a new user successfully", async () => {
-
       mockPrisma.user.findUnique.mockResolvedValue(null);
       vi.mocked(bcrypt.hash).mockResolvedValue("hashed_password" as never);
       vi.mocked(generateOTP).mockReturnValue("123456");
