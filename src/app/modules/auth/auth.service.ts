@@ -79,7 +79,6 @@ const loginUser = async (payload: { email: string; password: string }) => {
     {
       id: userData.id,
       email: userData.email,
-      role: userData.role,
     },
     config.jwt.jwt_access_secret as Secret,
     config.jwt.expires_in as string,
@@ -89,7 +88,6 @@ const loginUser = async (payload: { email: string; password: string }) => {
     {
       id: userData.id,
       email: userData.email,
-      role: userData.role,
     },
     config.jwt.jwt_refresh_secret as Secret,
     config.jwt.refresh_token_expires_in as string,
@@ -117,8 +115,7 @@ const refreshToken = async (token: string) => {
 
   const accessToken = jwtHelpers.generateToken(
     {
-      email: userData.email,
-      role: userData.role,
+      email: userData.email
     },
     config.jwt.jwt_access_secret as Secret,
     config.jwt.expires_in as string,
