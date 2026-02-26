@@ -1,25 +1,17 @@
-import { PrismaClient, UserStatus } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import type { Secret } from "jsonwebtoken";
 import config from "#config/index.js";
 import ApiError from "#app/errors/ApiError.js";
 import { jwtHelpers } from "#app/helpers/jwtHelper.js";
-import {
-  sendEmailVerification,
-  sendPasswordResetOTP,
-} from "#app/utils/emailService.js";
+import { sendEmailVerification, sendPasswordResetOTP } from "#app/utils/emailService.js";
 import { generateOTP } from "#app/utils/generateOtp.js";
 import { storeOTP, verifyOTP } from "../otp/otp.service.js";
 
 const prisma = new PrismaClient();
 
-const registerUser = async (payload: {
-  email: string;
-  fullName: string;
-  password: string;
-  phoneNumber?: string;
-}) => {
+const registerUser = async (payload: { email: string; fullName: string; password: string; phoneNumber?: string }) => {
   const existingUser = await prisma.user.findUnique({
     where: { email: payload.email },
   });
@@ -28,10 +20,7 @@ const registerUser = async (payload: {
     throw new ApiError(httpStatus.BAD_REQUEST, "User already exists!");
   }
 
-  const hashedPassword = await bcrypt.hash(
-    payload.password,
-    Number(config.salt_round)
-  );
+  const hashedPassword = await bcrypt.hash(payload.password, Number(config.salt_round));
 
   const otp = generateOTP();
   await storeOTP(payload.email, "email_verification", otp, 300); // 5 minutes
@@ -51,11 +40,7 @@ const registerUser = async (payload: {
 };
 
 const verifyEmail = async (payload: { email: string; otp: string }) => {
-  const isValidOTP = await verifyOTP(
-    payload.email,
-    "email_verification",
-    payload.otp
-  );
+  const isValidOTP = await verifyOTP(payload.email, "email_verification", payload.otp);
 
   if (!isValidOTP) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid or expired OTP!");
@@ -73,8 +58,6 @@ const loginUser = async (payload: { email: string; password: string }) => {
   const userData = await prisma.user.findUnique({
     where: {
       email: payload.email,
-      status: UserStatus.ACTIVE,
-      isDeleted: false,
     },
   });
 
@@ -83,16 +66,10 @@ const loginUser = async (payload: { email: string; password: string }) => {
   }
 
   if (!userData.isEmailVerified) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "Please verify your email first!"
-    );
+    throw new ApiError(httpStatus.BAD_REQUEST, "Please verify your email first!");
   }
 
-  const isCorrectPassword = await bcrypt.compare(
-    payload.password,
-    userData.password
-  );
+  const isCorrectPassword = await bcrypt.compare(payload.password, userData.password);
 
   if (!isCorrectPassword) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Password incorrect!");
@@ -105,7 +82,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
       role: userData.role,
     },
     config.jwt.jwt_access_secret as Secret,
-    config.jwt.expires_in as string
+    config.jwt.expires_in as string,
   );
 
   const refreshToken = jwtHelpers.generateToken(
@@ -115,7 +92,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
       role: userData.role,
     },
     config.jwt.jwt_refresh_secret as Secret,
-    config.jwt.refresh_token_expires_in as string
+    config.jwt.refresh_token_expires_in as string,
   );
 
   return {
@@ -127,10 +104,7 @@ const loginUser = async (payload: { email: string; password: string }) => {
 const refreshToken = async (token: string) => {
   let decodedData;
   try {
-    decodedData = jwtHelpers.verifyToken(
-      token,
-      config.jwt.jwt_refresh_secret as Secret
-    );
+    decodedData = jwtHelpers.verifyToken(token, config.jwt.jwt_refresh_secret as Secret);
   } catch (err) {
     throw new Error("You are not authorized!");
   }
@@ -138,7 +112,6 @@ const refreshToken = async (token: string) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: decodedData.email,
-      status: UserStatus.ACTIVE,
     },
   });
 
@@ -148,7 +121,7 @@ const refreshToken = async (token: string) => {
       role: userData.role,
     },
     config.jwt.jwt_access_secret as Secret,
-    config.jwt.expires_in as string
+    config.jwt.expires_in as string,
   );
 
   return {
@@ -160,23 +133,16 @@ const changePassword = async (user: any, payload: any) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: user.email,
-      status: UserStatus.ACTIVE,
     },
   });
 
-  const isCorrectPassword: boolean = await bcrypt.compare(
-    payload.oldPassword,
-    userData.password
-  );
+  const isCorrectPassword: boolean = await bcrypt.compare(payload.oldPassword, userData.password);
 
   if (!isCorrectPassword) {
     throw new Error("Password incorrect!");
   }
 
-  const hashedPassword: string = await bcrypt.hash(
-    payload.newPassword,
-    Number(config.salt_round)
-  );
+  const hashedPassword: string = await bcrypt.hash(payload.newPassword, Number(config.salt_round));
 
   await prisma.user.update({
     where: {
@@ -196,8 +162,6 @@ const forgotPassword = async (payload: { email: string }) => {
   const userData = await prisma.user.findUnique({
     where: {
       email: payload.email,
-      status: UserStatus.ACTIVE,
-      isDeleted: false,
     },
   });
 
@@ -213,25 +177,14 @@ const forgotPassword = async (payload: { email: string }) => {
   return { message: "Password reset OTP sent to your email!" };
 };
 
-const resetPassword = async (payload: {
-  email: string;
-  otp: string;
-  newPassword: string;
-}) => {
-  const isValidOTP = await verifyOTP(
-    payload.email,
-    "password_reset",
-    payload.otp
-  );
+const resetPassword = async (payload: { email: string; otp: string; newPassword: string }) => {
+  const isValidOTP = await verifyOTP(payload.email, "password_reset", payload.otp);
 
   if (!isValidOTP) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid or expired OTP!");
   }
 
-  const hashedPassword = await bcrypt.hash(
-    payload.newPassword,
-    Number(config.salt_round)
-  );
+  const hashedPassword = await bcrypt.hash(payload.newPassword, Number(config.salt_round));
 
   await prisma.user.update({
     where: { email: payload.email },
@@ -245,17 +198,13 @@ const getMe = async (user: any) => {
   const userData = await prisma.user.findUniqueOrThrow({
     where: {
       email: user.email,
-      status: UserStatus.ACTIVE,
-      isDeleted: false,
     },
     select: {
       id: true,
       email: true,
-      fullName: true,
-      phoneNumber: true,
-      profilePhoto: true,
-      address: true,
-      role: true,
+      firstName: true,
+      lastName: true,
+      phone: true,
       isEmailVerified: true,
       createdAt: true,
     },
@@ -264,10 +213,7 @@ const getMe = async (user: any) => {
   return userData;
 };
 
-const resendOTP = async (payload: {
-  email: string;
-  purpose: "email_verification" | "password_reset";
-}) => {
+const resendOTP = async (payload: { email: string; purpose: "email_verification" | "password_reset" }) => {
   const userData = await prisma.user.findUnique({
     where: { email: payload.email },
   });
