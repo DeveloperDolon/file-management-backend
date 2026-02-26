@@ -8,8 +8,8 @@ import { jwtHelpers } from "#app/helpers/jwtHelper.js";
 import {
   sendEmailVerification,
   sendPasswordResetOTP,
-} from "../../utils/emai.service";
-import { generateOTP } from "../../utils/generate.otp";
+} from "#app/utils/emailService.js";
+import { generateOTP } from "#app/utils/generateOtp.js";
 import { storeOTP, verifyOTP } from "../otp/otp.service.js";
 
 const prisma = new PrismaClient();
