@@ -53,9 +53,16 @@ const updatePackageInDB = async (id: string, data: Partial<TPackage>) => {
   return updatedPackage;
 };
 
+const deletePackageFromDB = async (id: string) => {
+  await prisma.subscriptionPackage.delete({
+    where: { id },
+  });
+};
+
 export const PackageService = {
   createPackageIntoDB,
   getAllPackagesFromDB,
   getSinglePackageFromDB,
   updatePackageInDB,
+  deletePackageFromDB,
 };

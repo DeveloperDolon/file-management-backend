@@ -6,11 +6,7 @@ import { AdminValidation } from "./admin.validation.js";
 
 const router = express.Router();
 
-router.post(
-  "/register",
-  validateRequest(AdminValidation.registerAdmin),
-  AdminController.registerAdmin
-);
+router.post("/register", validateRequest(AdminValidation.registerAdmin), AdminController.registerAdmin);
 
 router.post("/login", AdminController.adminLogin);
 

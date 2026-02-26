@@ -49,9 +49,22 @@ const updatePackage = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const deletePackage = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params as { id: string };
+  await PackageService.deletePackageFromDB(id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Package deleted successfully",
+    data: "Deleted"
+  });
+});
+
 export const PackageController = {
   createPackage,
   getAllPackages,
   getSinglePackage,
   updatePackage,
+  deletePackage,
 };
