@@ -1,54 +1,41 @@
-import type { Application, Request, Response } from "express";
+import { Server } from "http";
+import app from "./app.js";
+import config from "./config/index.js";
 
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import express from "express";
+async function bootstrap() {
+  // This variable will hold our server instance
+  let server: Server;
 
-import globalErrorHandler from "./app/middlewares/globalErrorHandler";
-import notFound from "./app/middlewares/notFound";
-import config from "./config";
-import router from "./routes";
+  try {
+    // Start the server
+    server = app.listen(config.port, () => {
+      console.log(
+        `🚀 File management system Server is running on http://localhost:${config.port}`
+      );
+    });
 
-const app: Application = express();
-
-app.use(
-  cors({
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    origin: (origin, callback) => {
-      const allowedOrigins = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://localhost:3001",
-      ];
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
+    // Function to gracefully shut down the server
+    const exitHandler = () => {
+      if (server) {
+        server.close(() => {
+          console.log("Server closed gracefully.");
+          process.exit(1); // Exit with a failure code
+        });
       } else {
-        callback(new Error("Not allowed by CORS"));
+        process.exit(1);
       }
-    },
-  })
-);
+    };
 
-//parser
-app.use(express.json());
-app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+    // Handle unhandled promise rejections
+    process.on("unhandledRejection", (error) => {
+      console.log(
+        "Unhandled Rejection is detected, we are closing our server..."
+      );
+    });
+  } catch (error) {
+    console.error("Error during server startup:", error);
+    process.exit(1);
+  }
+}
 
-//routes
-app.use("/api/v1", router);
-
-app.get("/", (req: Request, res: Response) => {
-  res.send({
-    environment: config.node_env,
-    message: "File management system running..",
-    timeStamp: new Date().toISOString(),
-    uptime: process.uptime().toFixed(2) + " sec",
-  });
-});
-
-app.use(globalErrorHandler);
-
-app.use(notFound);
-
-export default app;
+bootstrap();
