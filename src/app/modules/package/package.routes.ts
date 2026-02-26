@@ -7,6 +7,8 @@ import { PackageController } from "./package.controller.js";
 const router = express.Router();
 
 router.post("/", authGuard(), validateRequest(PackageValidation.packageSchema), PackageController.createPackage);
-router.get("/", authGuard(), PackageController.getAllPackages);
+router.get("/", PackageController.getAllPackages);
+router.get("/:id", PackageController.getSinglePackage);
+router.put("/:id", authGuard(), validateRequest(PackageValidation.packageSchema), PackageController.updatePackage);
 
 export const PackageRoutes = router;

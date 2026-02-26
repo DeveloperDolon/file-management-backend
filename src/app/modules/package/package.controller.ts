@@ -15,17 +15,43 @@ const createPackage = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllPackages = catchAsync(async (req: Request, res: Response) => {
-    const packages = await PackageService.getAllPackagesFromDB();
+  const packages = await PackageService.getAllPackagesFromDB();
 
-    sendResponse(res, {
-        statusCode: 200,
-        success: true,
-        message: "Packages retrieved successfully",
-        data: packages,
-    });
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Packages retrieved successfully",
+    data: packages,
+  });
+});
+
+const getSinglePackage = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params as { id: string };
+  const subscriptionPackage = await PackageService.getSinglePackageFromDB(id);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Package retrieved successfully",
+    data: subscriptionPackage,
+  });
+});
+
+const updatePackage = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params as { id: string };
+  const updatedPackage = await PackageService.updatePackageInDB(id, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Package updated successfully",
+    data: updatedPackage,
+  });
 });
 
 export const PackageController = {
   createPackage,
-  getAllPackages
+  getAllPackages,
+  getSinglePackage,
+  updatePackage,
 };
