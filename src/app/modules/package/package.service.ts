@@ -21,6 +21,12 @@ const createPackageIntoDB = async (data: TPackage) => {
   return newPackage;
 };
 
+const getAllPackagesFromDB = async () => {
+    const packages = await prisma.subscriptionPackage.findMany();
+    return packages;
+}
+ 
 export const PackageService = {
   createPackageIntoDB,
+  getAllPackagesFromDB
 };

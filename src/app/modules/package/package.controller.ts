@@ -14,6 +14,18 @@ const createPackage = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const packageController = {
+const getAllPackages = catchAsync(async (req: Request, res: Response) => {
+    const packages = await PackageService.getAllPackagesFromDB();
+
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: "Packages retrieved successfully",
+        data: packages,
+    });
+});
+
+export const PackageController = {
   createPackage,
+  getAllPackages
 };
