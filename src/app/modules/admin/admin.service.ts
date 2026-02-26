@@ -66,7 +66,25 @@ const adminLogin = async (email: string, password: string) => {
   };
 };
 
+const getAdminProfile = async (adminId: number) => {
+  const adminProfile = await prisma.admin.findUnique({
+    where: { id: adminId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+    },
+  });
+
+  if (!adminProfile) {
+    throw new Error("Admin not found!");
+  }
+
+  return adminProfile;
+};
+
 export const AdminService = {
   registerAdminIntoDB,
   adminLogin,
+  getAdminProfile,
 };

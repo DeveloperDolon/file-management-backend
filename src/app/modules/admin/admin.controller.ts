@@ -21,14 +21,14 @@ const adminLogin = catchAsync(async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const result = await AdminService.adminLogin(email, password);
 
-  res.cookie("accessToken", result?.accessToken, {
+  res.cookie("adminAccessToken", result?.accessToken, {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     sameSite: "lax",
     maxAge: 1000 * 60 * 60, // 1 hour
   });
 
-  res.cookie("refreshToken", result?.refreshToken, {
+  res.cookie("adminRefreshToken", result?.refreshToken, {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     sameSite: "lax",
@@ -39,11 +39,24 @@ const adminLogin = catchAsync(async (req: Request, res: Response) => {
     statusCode: httpStatus.OK,
     success: true,
     message: "Admin logged in successfully!",
-    data: result?.accessToken,
+    data: result,
+  });
+});
+
+const adminGetProfile = catchAsync(async (req: Request & { user?: any }, res: Response) => {
+  const adminId = req.user.id;
+  const adminProfile = await AdminService.getAdminProfile(adminId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin profile retrieved successfully!",
+    data: adminProfile,
   });
 });
 
 export const AdminController = {
   registerAdmin,
-  adminLogin
+  adminLogin,
+  adminGetProfile,
 };
