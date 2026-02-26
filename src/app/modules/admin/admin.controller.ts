@@ -17,6 +17,33 @@ const registerAdmin = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const adminLogin = catchAsync(async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const result = await AdminService.adminLogin(email, password);
+
+  res.cookie("accessToken", result?.accessToken, {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 60, // 1 hour
+  });
+
+  res.cookie("refreshToken", result?.refreshToken, {
+    secure: process.env.NODE_ENV === "production",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+  });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Admin logged in successfully!",
+    data: result?.accessToken,
+  });
+});
+
 export const AdminController = {
   registerAdmin,
+  adminLogin
 };
