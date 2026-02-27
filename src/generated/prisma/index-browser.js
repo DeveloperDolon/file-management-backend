@@ -120,9 +120,126 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.AdminScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  password: 'password',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SubscriptionPackageScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  price: 'price',
+  maxFolders: 'maxFolders',
+  maxNestingLevel: 'maxNestingLevel',
+  allowedFileTypes: 'allowedFileTypes',
+  maxFileSizeMB: 'maxFileSizeMB',
+  totalFileLimit: 'totalFileLimit',
+  filesPerFolder: 'filesPerFolder',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  password: 'password',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  phone: 'phone',
+  isEmailVerified: 'isEmailVerified',
+  emailVerifyToken: 'emailVerifyToken',
+  passwordResetToken: 'passwordResetToken',
+  passwordResetExpiry: 'passwordResetExpiry',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.OtpLogScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  purpose: 'purpose',
+  sentAt: 'sentAt',
+  ip: 'ip',
+  success: 'success',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.UserSubscriptionScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  packageId: 'packageId',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  isActive: 'isActive'
+};
+
+exports.Prisma.FolderScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  userId: 'userId',
+  parentId: 'parentId',
+  depth: 'depth',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FileScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  originalName: 'originalName',
+  userId: 'userId',
+  folderId: 'folderId',
+  fileType: 'fileType',
+  mimeType: 'mimeType',
+  sizeMB: 'sizeMB',
+  storageKey: 'storageKey',
+  storageUrl: 'storageUrl',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+exports.SubscriptionTier = exports.$Enums.SubscriptionTier = {
+  FREE: 'FREE',
+  SILVER: 'SILVER',
+  GOLD: 'GOLD',
+  DIAMOND: 'DIAMOND'
+};
+
+exports.FileType = exports.$Enums.FileType = {
+  IMAGE: 'IMAGE',
+  VIDEO: 'VIDEO',
+  PDF: 'PDF',
+  AUDIO: 'AUDIO'
+};
 
 exports.Prisma.ModelName = {
-
+  Admin: 'Admin',
+  SubscriptionPackage: 'SubscriptionPackage',
+  User: 'User',
+  OtpLog: 'OtpLog',
+  UserSubscription: 'UserSubscription',
+  Folder: 'Folder',
+  File: 'File'
 };
 
 /**

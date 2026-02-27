@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "#config/prisma.js";
 import * as bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import type { Secret } from "jsonwebtoken";
@@ -8,8 +8,6 @@ import { jwtHelpers } from "#app/helpers/jwtHelper.js";
 import { sendEmailVerification, sendPasswordResetOTP } from "#app/utils/emailService.js";
 import { generateOTP } from "#app/utils/generateOtp.js";
 import { storeOTP, verifyOTP } from "../otp/otp.service.js";
-
-const prisma = new PrismaClient();
 
 const registerUser = async (payload: { email: string; firstName: string; lastName: string; password: string; phone?: string }) => {
   const existingUser = await prisma.user.findUnique({
@@ -31,7 +29,7 @@ const registerUser = async (payload: { email: string; firstName: string; lastNam
       firstName: payload.firstName,
       lastName: payload.lastName,
       password: hashedPassword,
-      phone: payload.phone,
+      phone: payload.phone ?? null,
     },
   });
 

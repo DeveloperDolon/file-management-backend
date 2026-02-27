@@ -1,9 +1,7 @@
-import { PrismaClient } from "@prisma/client";
 import httpStatus from "http-status";
 import ApiError from "#app/errors/ApiError.js";
 import type { TCreateFolder, TRenameFolder } from "./folder.interfaces.js";
-
-const prisma = new PrismaClient();
+import prisma from "#config/prisma.js";
 
 // ─── Enforcement Helper ────────────────────────────────────────────────────────
 

@@ -1,11 +1,9 @@
-import { PrismaClient } from "@prisma/client";
 import type { TAdmin } from "./admin.interfaces.js";
 import config from "#config/index.js";
 import bcrypt from "bcryptjs";
 import type { Secret } from "jsonwebtoken";
 import { jwtHelpers } from "#app/helpers/jwtHelper.js";
-
-const prisma = new PrismaClient();
+import prisma from "#config/prisma.js";
 
 const registerAdminIntoDB = async (adminData: TAdmin) => {
   const existingAdmin = await prisma.admin.findUnique({
@@ -66,7 +64,7 @@ const adminLogin = async (email: string, password: string) => {
   };
 };
 
-const getAdminProfile = async (adminId: number) => {
+const getAdminProfile = async (adminId: string) => {
   const adminProfile = await prisma.admin.findUnique({
     where: { id: adminId },
     select: {

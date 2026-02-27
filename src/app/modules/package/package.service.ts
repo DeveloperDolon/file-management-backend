@@ -1,7 +1,5 @@
-import { PrismaClient } from "@prisma/client";
 import type { TPackage } from "./package.interfaces.js";
-
-const prisma = new PrismaClient();
+import prisma from "#config/prisma.js";
 
 const createPackageIntoDB = async (data: TPackage) => {
   const newPackage = await prisma.subscriptionPackage.create({
@@ -35,19 +33,13 @@ const getSinglePackageFromDB = async (id: string) => {
 };
 
 const updatePackageInDB = async (id: string, data: Partial<TPackage>) => {
+  const updateData = Object.fromEntries(
+    Object.entries(data).filter(([, value]) => value !== undefined)
+  );
+
   const updatedPackage = await prisma.subscriptionPackage.update({
     where: { id },
-    data: {
-      name: data.name,
-      price: data.price,
-      maxFolders: data.maxFolders,
-      maxNestingLevel: data.maxNestingLevel,
-      allowedFileTypes: data.allowedFileTypes,
-      maxFileSizeMB: data.maxFileSizeMB,
-      totalFileLimit: data.totalFileLimit,
-      filesPerFolder: data.filesPerFolder,
-      isActive: data.isActive,
-    },
+    data: updateData,
   });
 
   return updatedPackage;

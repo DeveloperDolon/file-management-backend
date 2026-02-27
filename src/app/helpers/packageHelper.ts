@@ -1,9 +1,7 @@
 import httpStatus from 'http-status';
-import { PrismaClient } from "@prisma/client";
+import prisma from "#config/prisma.js";
 import ApiError from "#app/errors/ApiError.js";
 // ─── Enforcement Helper ────────────────────────────────────────────────────────
-
-const prisma = new PrismaClient();
 
 export const getActivePackage = async (userId: string) => {
   const subscription = await prisma.userSubscription.findFirst({

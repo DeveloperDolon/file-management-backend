@@ -1,12 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+
 import httpStatus from "http-status";
 import fs from "fs";
 import path from "path";
 import ApiError from "#app/errors/ApiError.js";
 import { MIME_TO_FILE_TYPE, type TRenameFile, type TFileType } from "./file.interfaces.js";
 import { getActivePackage } from "#app/helpers/packageHelper.js";
-
-const prisma = new PrismaClient();
+import prisma from "#config/prisma.js";
 
 // ─── Service Methods ───────────────────────────────────────────────────────────
 
