@@ -11,7 +11,7 @@ import { storeOTP, verifyOTP } from "../otp/otp.service.js";
 
 const prisma = new PrismaClient();
 
-const registerUser = async (payload: { email: string; fullName: string; password: string; phoneNumber?: string }) => {
+const registerUser = async (payload: { email: string; firstName: string; lastName: string; password: string; phone?: string }) => {
   const existingUser = await prisma.user.findUnique({
     where: { email: payload.email },
   });
@@ -28,9 +28,10 @@ const registerUser = async (payload: { email: string; fullName: string; password
   await prisma.user.create({
     data: {
       email: payload.email,
-      fullName: payload.fullName,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
       password: hashedPassword,
-      phoneNumber: payload.phoneNumber,
+      phone: payload.phone,
     },
   });
 
