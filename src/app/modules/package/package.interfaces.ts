@@ -1,4 +1,5 @@
 enum SubscriptionTier {
+  FREE = "FREE",
   SILVER = "SILVER",
   GOLD = "GOLD",
   DIAMOND = "DIAMOND",

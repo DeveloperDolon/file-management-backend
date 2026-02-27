@@ -2,7 +2,7 @@ import z from "zod";
 
 export const packageSchema = z.object({
   body: z.object({
-    name: z.enum(["SILVER", "GOLD", "DIAMOND"]),
+    name: z.enum(["FREE", "SILVER", "GOLD", "DIAMOND"]),
     price: z.number().positive(),
     maxFolders: z.number().int().positive(),
     maxNestingLevel: z.number().int().positive(),
@@ -15,5 +15,5 @@ export const packageSchema = z.object({
 });
 
 export const PackageValidation = {
-  packageSchema,
+  packageSchema
 };
