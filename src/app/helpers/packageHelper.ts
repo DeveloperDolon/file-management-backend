@@ -1,0 +1,20 @@
+import httpStatus from 'http-status';
+import { PrismaClient } from "@prisma/client";
+import ApiError from "#app/errors/ApiError.js";
+// ─── Enforcement Helper ────────────────────────────────────────────────────────
+
+const prisma = new PrismaClient();
+
+export const getActivePackage = async (userId: string) => {
+  const subscription = await prisma.userSubscription.findFirst({
+    where: { userId, isActive: true },
+    include: { package: true },
+    orderBy: { startDate: "desc" },
+  });
+
+  if (!subscription) {
+    throw new ApiError(httpStatus.FORBIDDEN, "You do not have an active subscription package.");
+  }
+
+  return subscription.package;
+};
