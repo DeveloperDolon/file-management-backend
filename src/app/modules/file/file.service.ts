@@ -62,8 +62,6 @@ const uploadFile = async (userId: string, folderId: string, uploadedFile: Expres
     throw new ApiError(httpStatus.FORBIDDEN, "You do not have access to this folder!");
   }
 
-  // ── Save to DB ──
-  // storageKey = relative path; storageUrl = public URL or path
   const storageKey = uploadedFile.filename;
   const storageUrl = `/uploads/${uploadedFile.filename}`;
 

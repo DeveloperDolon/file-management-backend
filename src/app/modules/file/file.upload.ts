@@ -48,7 +48,6 @@ const fileFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
   }
 };
 
-// 500MB hard limit — actual per-user limit enforced in service
 export const uploadMiddleware = multer({
   storage,
   fileFilter,
