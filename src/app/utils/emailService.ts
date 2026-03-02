@@ -21,7 +21,7 @@ export async function sendEmailVerification(email: string, otp: string) {
         </div>
       </div>
     `,
-  });
+  }); 
 }
 
 export async function sendPasswordResetOTP(email: string, otp: string) {

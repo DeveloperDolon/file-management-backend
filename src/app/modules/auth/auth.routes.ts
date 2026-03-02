@@ -20,7 +20,7 @@ router.post("/forgot-password", validateRequest(AuthValidation.forgotPassword), 
 
 router.post("/reset-password", validateRequest(AuthValidation.resetPassword), AuthController.resetPassword);
 
-router.post("/resend-otp", validateRequest(AuthValidation.resendOTP), AuthController.resendOTP);
+router.post("/resend-otp", validateRequest(AuthValidation.resendOTP), AuthController.resendOTP); 
 
 router.get("/me", authGuard(), AuthController.getMe);
 

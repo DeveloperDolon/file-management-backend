@@ -10,32 +10,25 @@ import { generateOTP } from "#app/utils/generateOtp.js";
 import { storeOTP, verifyOTP } from "../otp/otp.service.js";
 
 const registerUser = async (payload: { email: string; firstName: string; lastName: string; password: string; phone?: string }) => {
-  const existingUser = await prisma.user.findUnique({
-    where: { email: payload.email },
-  });
+  try {
+    const existingUser = await prisma.user.findUnique({ where: { email: payload.email } });
+    if (existingUser) throw new ApiError(httpStatus.BAD_REQUEST, "User already exists!");
 
-  if (existingUser) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "User already exists!");
+    const hashedPassword = await bcrypt.hash(payload.password, Number(config.salt_round));
+
+    await prisma.user.create({ data: { ...payload, password: hashedPassword, phone: payload.phone ?? null } });
+
+    const otp = generateOTP();
+
+    await storeOTP(payload.email, "email_verification", otp, 300);
+
+    await sendEmailVerification(payload.email, otp);
+
+    return { message: "Registration successful! Please verify your email." };
+  } catch (err) {
+    console.error("REGISTER ERROR:", err);
+    throw err;
   }
-
-  const hashedPassword = await bcrypt.hash(payload.password, Number(config.salt_round));
-
-  const otp = generateOTP();
-  await storeOTP(payload.email, "email_verification", otp, 300); // 5 minutes
-
-  await prisma.user.create({
-    data: {
-      email: payload.email,
-      firstName: payload.firstName,
-      lastName: payload.lastName,
-      password: hashedPassword,
-      phone: payload.phone ?? null,
-    },
-  });
-
-  await sendEmailVerification(payload.email, otp);
-
-  return { message: "Registration successful! Please verify your email." };
 };
 
 const verifyEmail = async (payload: { email: string; otp: string }) => {
@@ -64,9 +57,9 @@ const loginUser = async (payload: { email: string; password: string }) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found!");
   }
 
-  if (!userData.isEmailVerified) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Please verify your email first!");
-  }
+  // if (!userData.isEmailVerified) {
+  //   throw new ApiError(httpStatus.BAD_REQUEST, "Please verify your email first!");
+  // }
 
   const isCorrectPassword = await bcrypt.compare(payload.password, userData.password);
 
@@ -114,7 +107,7 @@ const refreshToken = async (token: string) => {
 
   const accessToken = jwtHelpers.generateToken(
     {
-      email: userData.email
+      email: userData.email,
     },
     config.jwt.jwt_access_secret as Secret,
     config.jwt.expires_in as string,
