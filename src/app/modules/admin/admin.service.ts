@@ -1,9 +1,9 @@
 import type { TAdmin } from "./admin.interfaces.js";
-import config from "#config/index.js";
 import bcrypt from "bcryptjs";
 import type { Secret } from "jsonwebtoken";
 import { jwtHelpers } from "#app/helpers/jwtHelper.js";
-import prisma from "#config/prisma.js";
+import prisma from "../../../config/prisma.js";
+import config from "../../../config/index.js";
 
 const registerAdminIntoDB = async (adminData: TAdmin) => {
   const existingAdmin = await prisma.admin.findUnique({

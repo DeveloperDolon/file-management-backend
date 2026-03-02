@@ -1,6 +1,6 @@
 import ApiError from "#app/errors/ApiError.js";
 import httpStatus from "http-status";
-import prisma from "#config/prisma.js";
+import prisma from "../../../config/prisma.js";
 
 const getMySubscriptions = async (userId: string) => {
   const active = await prisma.userSubscription.findFirst({

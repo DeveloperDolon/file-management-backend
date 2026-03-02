@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "imports": {
-    "#*": "./src/*"
+    "#app/*": "./src/app/*.js"
   },
   "scripts": {
     "test": "vitest",
@@ -20,6 +20,9 @@
     "lint:fix": "eslint --fix .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
   },
   "keywords": [],
   "author": "Dolon Roy",
@@ -43,7 +46,7 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
-    "@types/node": "^25.3.1",
+    "@types/node": "^25.3.3",
     "@types/nodemailer": "^7.0.11",
     "@types/pg": "^8.16.0",
     "@vitest/coverage-v8": "^4.0.18",

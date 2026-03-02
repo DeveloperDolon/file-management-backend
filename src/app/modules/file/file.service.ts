@@ -5,7 +5,7 @@ import path from "path";
 import ApiError from "#app/errors/ApiError.js";
 import { MIME_TO_FILE_TYPE, type TRenameFile, type TFileType } from "./file.interfaces.js";
 import { getActivePackage } from "#app/helpers/packageHelper.js";
-import prisma from "#config/prisma.js";
+import prisma from "../../../config/prisma.js";
 
 // ─── Service Methods ───────────────────────────────────────────────────────────
 

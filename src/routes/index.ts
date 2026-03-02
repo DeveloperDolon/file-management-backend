@@ -19,7 +19,7 @@ const moduleRoutes = [
     route: AdminRoutes
   },
   {
-    path: "/package",
+    path: "/packages",
     route: PackageRoutes
   },
   {

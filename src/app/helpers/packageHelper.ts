@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
-import prisma from "#config/prisma.js";
 import ApiError from "#app/errors/ApiError.js";
+import prisma from '../../config/prisma.js';
 // ─── Enforcement Helper ────────────────────────────────────────────────────────
 
 export const getActivePackage = async (userId: string) => {

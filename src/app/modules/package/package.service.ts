@@ -1,5 +1,5 @@
+import prisma from "../../../config/prisma.js";
 import type { TPackage } from "./package.interfaces.js";
-import prisma from "#config/prisma.js";
 
 const createPackageIntoDB = async (data: TPackage) => {
   const newPackage = await prisma.subscriptionPackage.create({

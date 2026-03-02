@@ -10,7 +10,7 @@ export const packageSchema = z.object({
     maxFileSizeMB: z.number().positive(),
     totalFileLimit: z.number().int().positive(),
     filesPerFolder: z.number().int().positive(),
-    isActive: z.boolean(),
+    isActive: z.boolean().default(true),
   }),
 });
 

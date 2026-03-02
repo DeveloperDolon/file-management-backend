@@ -1,13 +1,13 @@
-import prisma from "#config/prisma.js";
 import * as bcrypt from "bcryptjs";
 import httpStatus from "http-status";
 import type { Secret } from "jsonwebtoken";
-import config from "#config/index.js";
 import ApiError from "#app/errors/ApiError.js";
 import { jwtHelpers } from "#app/helpers/jwtHelper.js";
 import { sendEmailVerification, sendPasswordResetOTP } from "#app/utils/emailService.js";
 import { generateOTP } from "#app/utils/generateOtp.js";
 import { storeOTP, verifyOTP } from "../otp/otp.service.js";
+import prisma from "../../../config/prisma.js";
+import config from "../../../config/index.js";
 
 const registerUser = async (payload: { email: string; firstName: string; lastName: string; password: string; phone?: string }) => {
   try {
