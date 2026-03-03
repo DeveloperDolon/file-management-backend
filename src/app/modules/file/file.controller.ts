@@ -78,11 +78,10 @@ const deleteFile = catchAsync(async (req: Request & { user?: any }, res: Respons
 const downloadFile = catchAsync(async (req: Request & { user?: any }, res: Response) => {
   const userId = req.user.id;
   const { id } = req.params as { id: string };
-  const { filePath, originalName, mimeType } = await FileService.downloadFile(userId, id);
+  const { downloadUrl, originalName, mimeType } = await FileService.downloadFile(userId, id);
 
-  res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(originalName)}"`);
-  res.setHeader("Content-Type", mimeType);
-  res.download(filePath, originalName);
+  res.redirect(downloadUrl);
+
 });
 
 export const FileController = {

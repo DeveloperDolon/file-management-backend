@@ -1,24 +1,16 @@
 import multer from "multer";
-import path from "path";
-import fs from "fs";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 import ApiError from "#app/errors/ApiError.js";
 import httpStatus from "http-status";
 
-const uploadDir = "uploads/";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const ext = path.extname(file.originalname);
-    cb(null, `${uniqueSuffix}${ext}`);
-  },
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
+  api_key: process.env.CLOUDINARY_API_KEY!,
+  api_secret: process.env.CLOUDINARY_API_SECRET!,
 });
+
+export { cloudinary };
 
 const allowedMimeTypes = [
   "image/jpeg",
@@ -39,6 +31,26 @@ const allowedMimeTypes = [
   "audio/aac",
   "audio/webm",
 ];
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (_req: any, file: any) => {
+    let resourceType: "image" | "video" | "raw" | "auto" = "auto";
+
+    if (file.mimetype.startsWith("image/")) resourceType = "image";
+    else if (file.mimetype.startsWith("video/")) resourceType = "video";
+    else if (file.mimetype.startsWith("audio/"))
+      resourceType = "video"; // Cloudinary handles audio under "video"
+    else if (file.mimetype === "application/pdf") resourceType = "raw";
+
+    return {
+      folder: "uploads",
+      resource_type: resourceType,
+      use_filename: true,
+      unique_filename: true,
+    };
+  },
+});
 
 const fileFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
   if (allowedMimeTypes.includes(file.mimetype)) {
