@@ -8,7 +8,7 @@
 
     // Add this so TS resolves #app/* during type-checking
     "paths": {
-      "#app/*": ["./src/app/*"]
+      "#*": ["./src/*"]
     },
 
     "typeRoots": ["./node_modules/@types"],

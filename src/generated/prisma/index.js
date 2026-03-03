@@ -27,7 +27,7 @@ const {
   Public,
   getRuntime,
   createParam,
-} = require('./runtime/library.js')
+} = require('./runtime/binary.js')
 
 
 const Prisma = {}
@@ -230,7 +230,7 @@ const config = {
       "fromEnvVar": null
     },
     "config": {
-      "engineType": "library"
+      "engineType": "binary"
     },
     "binaryTargets": [
       {
@@ -240,11 +240,11 @@ const config = {
       },
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-1.1.x"
+        "value": "debian-openssl-3.0.x"
       },
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x"
+        "value": "rhel-openssl-3.0.x"
       }
     ],
     "previewFeatures": [
@@ -273,8 +273,8 @@ const config = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider        = \"prisma-client-js\"\n  previewFeatures = [\"driverAdapters\"]\n  output          = \"../src/generated/prisma\"\n  binaryTargets   = [\"native\", \"debian-openssl-1.1.x\", \"debian-openssl-3.0.x\"]\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum FileType {\n  IMAGE\n  VIDEO\n  PDF\n  AUDIO\n}\n\nenum SubscriptionTier {\n  FREE\n  SILVER\n  GOLD\n  DIAMOND\n}\n\nmodel Admin {\n  id        String   @id @default(uuid())\n  name      String\n  email     String   @unique\n  password  String\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel SubscriptionPackage {\n  id               String           @id @default(uuid())\n  name             SubscriptionTier @unique\n  price            Int\n  maxFolders       Int\n  maxNestingLevel  Int\n  allowedFileTypes FileType[]\n  maxFileSizeMB    Float\n  totalFileLimit   Int\n  filesPerFolder   Int\n  isActive         Boolean          @default(true)\n  createdAt        DateTime         @default(now())\n  updatedAt        DateTime         @updatedAt\n\n  userSubscriptions UserSubscription[]\n}\n\nmodel User {\n  id                  String    @id @default(uuid())\n  email               String    @unique\n  password            String\n  firstName           String\n  lastName            String\n  phone               String?\n  isEmailVerified     Boolean   @default(false)\n  emailVerifyToken    String?\n  passwordResetToken  String?\n  passwordResetExpiry DateTime?\n  createdAt           DateTime  @default(now())\n  updatedAt           DateTime  @updatedAt\n\n  subscriptions UserSubscription[]\n  folders       Folder[]\n  files         File[]\n}\n\nmodel OtpLog {\n  id        String   @id @default(uuid())\n  email     String\n  purpose   String\n  sentAt    DateTime @default(now())\n  ip        String?\n  success   Boolean\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel UserSubscription {\n  id        String    @id @default(uuid())\n  userId    String\n  packageId String\n  startDate DateTime  @default(now())\n  endDate   DateTime?\n  isActive  Boolean   @default(true)\n\n  user    User                @relation(fields: [userId], references: [id])\n  package SubscriptionPackage @relation(fields: [packageId], references: [id])\n\n  @@index([userId, isActive])\n}\n\nmodel Folder {\n  id        String   @id @default(uuid())\n  name      String\n  userId    String\n  parentId  String? // null = root folder\n  depth     Int      @default(0) // 0 = root\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  user     User     @relation(fields: [userId], references: [id])\n  parent   Folder?  @relation(\"FolderHierarchy\", fields: [parentId], references: [id])\n  children Folder[] @relation(\"FolderHierarchy\")\n  files    File[]\n\n  @@unique([userId, parentId, name]) // no duplicate names in same parent\n  @@index([userId])\n  @@index([parentId])\n}\n\nmodel File {\n  id           String   @id @default(uuid())\n  name         String\n  originalName String\n  userId       String\n  folderId     String\n  fileType     FileType\n  mimeType     String\n  sizeMB       Float\n  storageKey   String // S3 key or local path\n  storageUrl   String\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n\n  user   User   @relation(fields: [userId], references: [id])\n  folder Folder @relation(fields: [folderId], references: [id])\n\n  @@index([userId])\n  @@index([folderId])\n}\n",
-  "inlineSchemaHash": "2fdc2339983e925bd70636a0a2a8d110f80aa8a2edb14d84d55d1f39ef0e983e",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider        = \"prisma-client-js\"\n  previewFeatures = [\"driverAdapters\"]\n  output          = \"../src/generated/prisma\"\n  binaryTargets   = [\"native\", \"debian-openssl-3.0.x\", \"rhel-openssl-3.0.x\"]\n  engineType      = \"binary\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nenum FileType {\n  IMAGE\n  VIDEO\n  PDF\n  AUDIO\n}\n\nenum SubscriptionTier {\n  FREE\n  SILVER\n  GOLD\n  DIAMOND\n}\n\nmodel Admin {\n  id        String   @id @default(uuid())\n  name      String\n  email     String   @unique\n  password  String\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel SubscriptionPackage {\n  id               String           @id @default(uuid())\n  name             SubscriptionTier @unique\n  price            Int\n  maxFolders       Int\n  maxNestingLevel  Int\n  allowedFileTypes FileType[]\n  maxFileSizeMB    Float\n  totalFileLimit   Int\n  filesPerFolder   Int\n  isActive         Boolean          @default(true)\n  createdAt        DateTime         @default(now())\n  updatedAt        DateTime         @updatedAt\n\n  userSubscriptions UserSubscription[]\n}\n\nmodel User {\n  id                  String    @id @default(uuid())\n  email               String    @unique\n  password            String\n  firstName           String\n  lastName            String\n  phone               String?\n  isEmailVerified     Boolean   @default(false)\n  emailVerifyToken    String?\n  passwordResetToken  String?\n  passwordResetExpiry DateTime?\n  createdAt           DateTime  @default(now())\n  updatedAt           DateTime  @updatedAt\n\n  subscriptions UserSubscription[]\n  folders       Folder[]\n  files         File[]\n}\n\nmodel OtpLog {\n  id        String   @id @default(uuid())\n  email     String\n  purpose   String\n  sentAt    DateTime @default(now())\n  ip        String?\n  success   Boolean\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel UserSubscription {\n  id        String    @id @default(uuid())\n  userId    String\n  packageId String\n  startDate DateTime  @default(now())\n  endDate   DateTime?\n  isActive  Boolean   @default(true)\n\n  user    User                @relation(fields: [userId], references: [id])\n  package SubscriptionPackage @relation(fields: [packageId], references: [id])\n\n  @@index([userId, isActive])\n}\n\nmodel Folder {\n  id        String   @id @default(uuid())\n  name      String\n  userId    String\n  parentId  String? // null = root folder\n  depth     Int      @default(0) // 0 = root\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n\n  user     User     @relation(fields: [userId], references: [id])\n  parent   Folder?  @relation(\"FolderHierarchy\", fields: [parentId], references: [id])\n  children Folder[] @relation(\"FolderHierarchy\")\n  files    File[]\n\n  @@unique([userId, parentId, name]) // no duplicate names in same parent\n  @@index([userId])\n  @@index([parentId])\n}\n\nmodel File {\n  id           String   @id @default(uuid())\n  name         String\n  originalName String\n  userId       String\n  folderId     String\n  fileType     FileType\n  mimeType     String\n  sizeMB       Float\n  storageKey   String // S3 key or local path\n  storageUrl   String\n  createdAt    DateTime @default(now())\n  updatedAt    DateTime @updatedAt\n\n  user   User   @relation(fields: [userId], references: [id])\n  folder Folder @relation(fields: [folderId], references: [id])\n\n  @@index([userId])\n  @@index([folderId])\n}\n",
+  "inlineSchemaHash": "51ac25be51b15dd2f2fffe0a44597506669179187cc2c40a945f2c231b1257f0",
   "copyEngine": true
 }
 
@@ -301,7 +301,7 @@ config.engineWasm = undefined
 config.compilerWasm = undefined
 
 
-const { warnEnvConflicts } = require('./runtime/library.js')
+const { warnEnvConflicts } = require('./runtime/binary.js')
 
 warnEnvConflicts({
     rootEnvPath: config.relativeEnvPaths.rootEnvPath && path.resolve(config.dirname, config.relativeEnvPaths.rootEnvPath),
@@ -313,12 +313,12 @@ exports.PrismaClient = PrismaClient
 Object.assign(exports, Prisma)
 
 // file annotations for bundling tools to include these files
-path.join(__dirname, "libquery_engine-debian-openssl-3.0.x.so.node");
-path.join(process.cwd(), "src/generated/prisma/libquery_engine-debian-openssl-3.0.x.so.node")
+path.join(__dirname, "query-engine-debian-openssl-3.0.x");
+path.join(process.cwd(), "src/generated/prisma/query-engine-debian-openssl-3.0.x")
 
 // file annotations for bundling tools to include these files
-path.join(__dirname, "libquery_engine-debian-openssl-1.1.x.so.node");
-path.join(process.cwd(), "src/generated/prisma/libquery_engine-debian-openssl-1.1.x.so.node")
+path.join(__dirname, "query-engine-rhel-openssl-3.0.x");
+path.join(process.cwd(), "src/generated/prisma/query-engine-rhel-openssl-3.0.x")
 // file annotations for bundling tools to include these files
 path.join(__dirname, "schema.prisma");
 path.join(process.cwd(), "src/generated/prisma/schema.prisma")

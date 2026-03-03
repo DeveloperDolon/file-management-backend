@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "imports": {
-    "#app/*": "./src/app/*.js"
+    "#*": "./src/*"
   },
   "scripts": {
     "test": "vitest",

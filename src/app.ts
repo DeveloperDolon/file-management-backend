@@ -20,6 +20,7 @@ app.use(
         "http://localhost:5173",
         "http://localhost:3000",
         "http://localhost:3001",
+        "https://file-management-frontend-sage.vercel.app"
       ];
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
