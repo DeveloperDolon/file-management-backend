@@ -5,6 +5,22 @@ import { getActivePackage } from "#app/helpers/packageHelper.js";
 import prisma from "../../../config/prisma.js";
 import { cloudinary } from "./file.upload.js";
 
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+const getResourceType = (mimeType: string): "image" | "video" | "raw" => {
+  if (mimeType.startsWith("image/")) return "image";
+  if (mimeType.startsWith("video/") || mimeType.startsWith("audio/")) return "video";
+  return "raw";
+};
+
+const destroyCloudinaryFile = async (publicId: string, mimeType: string) => {
+  if (!publicId) return;
+  await cloudinary.uploader.destroy(publicId, {
+    resource_type: getResourceType(mimeType),
+    invalidate: true,
+  });
+};
+
 // ─── Service Methods ───────────────────────────────────────────────────────────
 
 const uploadFile = async (userId: string, folderId: string, uploadedFile: Express.Multer.File) => {
@@ -13,17 +29,12 @@ const uploadFile = async (userId: string, folderId: string, uploadedFile: Expres
   const fileType = MIME_TO_FILE_TYPE[uploadedFile.mimetype] as TFileType | undefined;
 
   if (!fileType) {
-    // File was already uploaded to Cloudinary — delete it
-    if ((uploadedFile as any).public_id) {
-      await cloudinary.uploader.destroy((uploadedFile as any).public_id, { invalidate: true });
-    }
+    await destroyCloudinaryFile(uploadedFile.filename, uploadedFile.mimetype);
     throw new ApiError(httpStatus.BAD_REQUEST, "Unsupported file type.");
   }
 
   if (!pkg.allowedFileTypes.includes(fileType as any)) {
-    if ((uploadedFile as any).public_id) {
-      await cloudinary.uploader.destroy((uploadedFile as any).public_id, { invalidate: true });
-    }
+    await destroyCloudinaryFile(uploadedFile.filename, uploadedFile.mimetype);
     throw new ApiError(
       httpStatus.FORBIDDEN,
       `File type ${fileType} is not allowed on your ${pkg.name} plan. Allowed types: ${pkg.allowedFileTypes.join(", ")}.`,
@@ -32,9 +43,7 @@ const uploadFile = async (userId: string, folderId: string, uploadedFile: Expres
 
   const fileSizeMB = uploadedFile.size / (1024 * 1024);
   if (fileSizeMB > pkg.maxFileSizeMB) {
-    if ((uploadedFile as any).public_id) {
-      await cloudinary.uploader.destroy((uploadedFile as any).public_id, { invalidate: true });
-    }
+    await destroyCloudinaryFile(uploadedFile.filename, uploadedFile.mimetype);
     throw new ApiError(
       httpStatus.FORBIDDEN,
       `File size (${fileSizeMB.toFixed(2)}MB) exceeds the ${pkg.maxFileSizeMB}MB limit for your ${pkg.name} plan.`,
@@ -43,17 +52,13 @@ const uploadFile = async (userId: string, folderId: string, uploadedFile: Expres
 
   const totalFiles = await prisma.file.count({ where: { userId } });
   if (totalFiles >= pkg.totalFileLimit) {
-    if ((uploadedFile as any).public_id) {
-      await cloudinary.uploader.destroy((uploadedFile as any).public_id, { invalidate: true });
-    }
+    await destroyCloudinaryFile(uploadedFile.filename, uploadedFile.mimetype);
     throw new ApiError(httpStatus.FORBIDDEN, `Total file limit (${pkg.totalFileLimit}) reached for your ${pkg.name} plan.`);
   }
 
   const filesInFolder = await prisma.file.count({ where: { folderId } });
   if (filesInFolder >= pkg.filesPerFolder) {
-    if ((uploadedFile as any).public_id) {
-      await cloudinary.uploader.destroy((uploadedFile as any).public_id, { invalidate: true });
-    }
+    await destroyCloudinaryFile(uploadedFile.filename, uploadedFile.mimetype);
     throw new ApiError(
       httpStatus.FORBIDDEN,
       `This folder has reached the maximum files per folder (${pkg.filesPerFolder}) for your ${pkg.name} plan.`,
@@ -62,21 +67,16 @@ const uploadFile = async (userId: string, folderId: string, uploadedFile: Expres
 
   const folder = await prisma.folder.findUnique({ where: { id: folderId } });
   if (!folder) {
-    if ((uploadedFile as any).public_id) {
-      await cloudinary.uploader.destroy((uploadedFile as any).public_id, { invalidate: true });
-    }
+    await destroyCloudinaryFile(uploadedFile.filename, uploadedFile.mimetype);
     throw new ApiError(httpStatus.NOT_FOUND, "Folder not found!");
   }
   if (folder.userId !== userId) {
-    if ((uploadedFile as any).public_id) {
-      await cloudinary.uploader.destroy((uploadedFile as any).public_id, { invalidate: true });
-    }
+    await destroyCloudinaryFile(uploadedFile.filename, uploadedFile.mimetype);
     throw new ApiError(httpStatus.FORBIDDEN, "You do not have access to this folder!");
   }
 
-  // multer-storage-cloudinary attaches these to the file object
-  const storageKey = (uploadedFile as any).public_id as string;
-  const storageUrl = (uploadedFile as any).path as string; // Cloudinary secure URL
+  const storageKey = uploadedFile.filename; 
+  const storageUrl = uploadedFile.path;     
 
   const newFile = await prisma.file.create({
     data: {
@@ -87,8 +87,8 @@ const uploadFile = async (userId: string, folderId: string, uploadedFile: Expres
       fileType: fileType as any,
       mimeType: uploadedFile.mimetype,
       sizeMB: parseFloat(fileSizeMB.toFixed(4)),
-      storageKey,   
-      storageUrl, 
+      storageKey,
+      storageUrl,
     },
   });
 
@@ -142,15 +142,7 @@ const deleteFile = async (userId: string, fileId: string) => {
     throw new ApiError(httpStatus.FORBIDDEN, "You do not have access to this file!");
   }
 
-  let resourceType: "image" | "video" | "raw" = "raw";
-  if (file.mimeType.startsWith("image/")) resourceType = "image";
-  else if (file.mimeType.startsWith("video/") || file.mimeType.startsWith("audio/")) resourceType = "video";
-
-  await cloudinary.uploader.destroy(file.storageKey, {
-    resource_type: resourceType,
-    invalidate: true,
-  });
-
+  await destroyCloudinaryFile(file.storageKey, file.mimeType);
   await prisma.file.delete({ where: { id: fileId } });
 
   return { deleted: true, fileId };
@@ -167,13 +159,11 @@ const downloadFile = async (userId: string, fileId: string) => {
     throw new ApiError(httpStatus.FORBIDDEN, "You do not have access to this file!");
   }
 
-  const downloadUrl = cloudinary.utils.private_download_url(file.storageKey, "", {
-    resource_type: file.mimeType.startsWith("image/")
-      ? "image"
-      : file.mimeType.startsWith("video/") || file.mimeType.startsWith("audio/")
-        ? "video"
-        : "raw",
-    attachment: true,          
+  const downloadUrl = cloudinary.url(file.storageKey, {
+    resource_type: getResourceType(file.mimeType),
+    sign_url: true,
+    secure: true,
+    attachment: file.originalName,
     expires_at: Math.floor(Date.now() / 1000) + 3600,
   });
 
