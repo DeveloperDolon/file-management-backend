@@ -1,11 +1,3 @@
-# File management system design flow
-
-**System Architecture**
-![System Architecture](System_architecture.jpg)
-
-**Database Design**
-![Project Documentation](File_management_database_design.png)
-
 # VaultFS — Backend
 
 > REST API for the VaultFS SaaS File Management System. Built with Express.js, Prisma ORM, PostgreSQL, and Cloudinary.
